@@ -19,9 +19,9 @@ use ruma_events::{
 fn ephemeral_serialize_typing() {
     let aliases_event = EphemeralRoomEvent {
         content: AnyEphemeralRoomEventContent::Typing(TypingEventContent {
-            user_ids: vec![UserId::try_from("@carl:example.com").unwrap()],
+            user_ids: vec![user_id!("@carl:example.com")],
         }),
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
     };
 
     let actual = to_json_value(&aliases_event).unwrap();
@@ -56,15 +56,15 @@ fn deserialize_ephemeral_typing() {
                 user_ids,
             }),
             room_id,
-        } if user_ids[0] == UserId::try_from("@carl:example.com").unwrap()
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
+        } if user_ids[0] == user_id!("@carl:example.com")
+            && room_id == room_id!("!roomid:room.com")
     );
 }
 
 #[test]
 fn ephemeral_serialize_receipt() {
-    let event_id = EventId::try_from("$h29iv0s8:example.com").unwrap();
-    let user_id = UserId::try_from("@carl:example.com").unwrap();
+    let event_id = event_id!("$h29iv0s8:example.com");
+    let user_id = user_id!("@carl:example.com");
 
     let aliases_event = EphemeralRoomEvent {
         content: AnyEphemeralRoomEventContent::Receipt(ReceiptEventContent(btreemap! {
@@ -74,7 +74,7 @@ fn ephemeral_serialize_receipt() {
                 }),
             },
         })),
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
     };
 
     let actual = to_json_value(&aliases_event).unwrap();
@@ -95,8 +95,8 @@ fn ephemeral_serialize_receipt() {
 
 #[test]
 fn deserialize_ephemeral_receipt() {
-    let event_id = EventId::try_from("$h29iv0s8:example.com").unwrap();
-    let user_id = UserId::try_from("@carl:example.com").unwrap();
+    let event_id = event_id!("$h29iv0s8:example.com");
+    let user_id = user_id!("@carl:example.com");
 
     let json_data = json!({
         "content": {
@@ -119,7 +119,7 @@ fn deserialize_ephemeral_receipt() {
             content: AnyEphemeralRoomEventContent::Receipt(ReceiptEventContent(receipts)),
             room_id,
         } if !receipts.is_empty() && receipts.contains_key(&event_id)
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
+            && room_id == room_id!("!roomid:room.com")
             && receipts
                 .get(&event_id)
                 .map(|r| r.read.as_ref().unwrap().get(&user_id).unwrap().clone())

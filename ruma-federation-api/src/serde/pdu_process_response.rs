@@ -73,6 +73,7 @@ mod tests {
     use std::{collections::BTreeMap, convert::TryFrom};
 
     use ruma_identifiers::EventId;
+    use ruma_identifiers_macros::{event_id, room_alias_id, room_id, user_id};
     use serde_json::{json, value::Serializer as JsonSerializer};
 
     use super::{deserialize, serialize};
@@ -80,10 +81,7 @@ mod tests {
     #[test]
     fn serialize_error() {
         let mut response: BTreeMap<EventId, Result<(), String>> = BTreeMap::new();
-        response.insert(
-            EventId::try_from("$someevent:matrix.org").unwrap(),
-            Err("Some processing error.".into()),
-        );
+        response.insert(event_id!("$someevent:matrix.org"), Err("Some processing error.".into()));
 
         let serialized = serialize(&response, JsonSerializer).unwrap();
         let json = json!({
@@ -95,7 +93,7 @@ mod tests {
     #[test]
     fn serialize_ok() {
         let mut response: BTreeMap<EventId, Result<(), String>> = BTreeMap::new();
-        response.insert(EventId::try_from("$someevent:matrix.org").unwrap(), Ok(()));
+        response.insert(event_id!("$someevent:matrix.org"), Ok(()));
 
         let serialized = serialize(&response, serde_json::value::Serializer).unwrap();
         let json = json!({
@@ -111,7 +109,7 @@ mod tests {
         });
 
         let response = deserialize(json).unwrap();
-        let event_id = EventId::try_from("$someevent:matrix.org").unwrap();
+        let event_id = event_id!("$someevent:matrix.org");
 
         let event_response = response.get(&event_id).unwrap().clone().unwrap_err();
         assert_eq!(event_response, "Some processing error.");
@@ -124,7 +122,7 @@ mod tests {
         });
 
         let response = deserialize(json).unwrap();
-        let event_id = EventId::try_from("$someevent:matrix.org").unwrap();
+        let event_id = event_id!("$someevent:matrix.org");
 
         assert!(response.get(&event_id).unwrap().is_ok());
     }
@@ -136,7 +134,7 @@ mod tests {
         });
 
         let response = deserialize(json).unwrap();
-        let event_id = EventId::try_from("$someevent:matrix.org").unwrap();
+        let event_id = event_id!("$someevent:matrix.org");
 
         let event_response = response.get(&event_id).unwrap().clone().unwrap_err();
         assert_eq!(event_response, "");
@@ -148,9 +146,6 @@ mod tests {
             "$someevent:matrix.org": {}
         });
         let response = deserialize(json).unwrap();
-        assert!(response
-            .get(&EventId::try_from("$someevent:matrix.org").unwrap())
-            .unwrap()
-            .is_ok());
+        assert!(response.get(&event_id!("$someevent:matrix.org")).unwrap().is_ok());
     }
 }

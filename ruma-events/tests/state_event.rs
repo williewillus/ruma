@@ -37,15 +37,15 @@ fn aliases_event_with_prev_content() -> JsonValue {
 fn serialize_aliases_with_prev_content() {
     let aliases_event = StateEvent {
         content: AnyStateEventContent::RoomAliases(AliasesEventContent::new(vec![
-            RoomAliasId::try_from("#somewhere:localhost").unwrap(),
+            room_alias_id!("#somewhere:localhost"),
         ])),
-        event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+        event_id: event_id!("$h29iv0s8:example.com"),
         origin_server_ts: UNIX_EPOCH + Duration::from_millis(1),
         prev_content: Some(AnyStateEventContent::RoomAliases(AliasesEventContent::new(vec![
-            RoomAliasId::try_from("#inner:localhost").unwrap(),
+            room_alias_id!("#inner:localhost"),
         ]))),
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
-        sender: UserId::try_from("@carl:example.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
+        sender: user_id!("@carl:example.com"),
         state_key: "".into(),
         unsigned: Unsigned::default(),
     };
@@ -60,13 +60,13 @@ fn serialize_aliases_with_prev_content() {
 fn serialize_aliases_without_prev_content() {
     let aliases_event = StateEvent {
         content: AnyStateEventContent::RoomAliases(AliasesEventContent::new(vec![
-            RoomAliasId::try_from("#somewhere:localhost").unwrap(),
+            room_alias_id!("#somewhere:localhost"),
         ])),
-        event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+        event_id: event_id!("$h29iv0s8:example.com"),
         origin_server_ts: UNIX_EPOCH + Duration::from_millis(1),
         prev_content: None,
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
-        sender: UserId::try_from("@carl:example.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
+        sender: user_id!("@carl:example.com"),
         state_key: "".into(),
         unsigned: Unsigned::default(),
     };
@@ -99,7 +99,7 @@ fn deserialize_aliases_content() {
             .deserialize_content("m.room.aliases")
             .unwrap(),
         AnyStateEventContent::RoomAliases(content)
-        if content.aliases == vec![RoomAliasId::try_from("#somewhere:localhost").unwrap()]
+        if content.aliases == vec![room_alias_id!("#somewhere:localhost")]
     );
 }
 
@@ -121,12 +121,12 @@ fn deserialize_aliases_with_prev_content() {
             sender,
             state_key,
             unsigned,
-        } if content.aliases == vec![RoomAliasId::try_from("#somewhere:localhost").unwrap()]
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+        } if content.aliases == vec![room_alias_id!("#somewhere:localhost")]
+            && event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && prev_content.aliases == vec![RoomAliasId::try_from("#inner:localhost").unwrap()]
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && prev_content.aliases == vec![room_alias_id!("#inner:localhost")]
+            && room_id == room_id!("!roomid:room.com")
+            && sender == user_id!("@carl:example.com")
             && state_key == ""
             && unsigned.is_empty()
     );
@@ -148,11 +148,11 @@ fn deserialize_aliases_sync_with_room_id() {
             sender,
             state_key,
             unsigned,
-        } if content.aliases == vec![RoomAliasId::try_from("#somewhere:localhost").unwrap()]
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+        } if content.aliases == vec![room_alias_id!("#somewhere:localhost")]
+            && event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && prev_content.aliases == vec![RoomAliasId::try_from("#inner:localhost").unwrap()]
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && prev_content.aliases == vec![room_alias_id!("#inner:localhost")]
+            && sender == user_id!("@carl:example.com")
             && state_key == ""
             && unsigned.is_empty()
     );
@@ -203,10 +203,10 @@ fn deserialize_avatar_without_prev_content() {
             sender,
             state_key,
             unsigned
-        } if event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+        } if event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && room_id == room_id!("!roomid:room.com")
+            && sender == user_id!("@carl:example.com")
             && state_key == ""
             && matches!(
                 info.as_ref(),
@@ -279,9 +279,9 @@ fn deserialize_member_event_with_top_level_membership_field() {
                 sender,
                 ..
             }
-        )) if event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+        )) if event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && sender == UserId::try_from("@example:localhost").unwrap()
+            && sender == user_id!("@example:localhost")
             && content.displayname == Some("example".into())
     );
 }
@@ -309,10 +309,10 @@ fn deserialize_full_event_convert_to_sync() {
             sender,
             state_key,
             unsigned,
-        }) if content.aliases == vec![RoomAliasId::try_from("#somewhere:localhost").unwrap()]
+        }) if content.aliases == vec![room_alias_id!("#somewhere:localhost")]
             && event_id == "$h29iv0s8:example.com"
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && prev_content.aliases == vec![RoomAliasId::try_from("#inner:localhost").unwrap()]
+            && prev_content.aliases == vec![room_alias_id!("#inner:localhost")]
             && sender == "@carl:example.com"
             && state_key == ""
             && unsigned.is_empty()

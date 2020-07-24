@@ -166,7 +166,7 @@ fn aliases_event_sync_deserialization() {
                 ..
             })
         ))
-        if aliases == vec![ RoomAliasId::try_from("#somewhere:localhost").unwrap() ]
+        if aliases == vec![ room_alias_id!("#somewhere:localhost") ]
     );
 }
 
@@ -205,7 +205,7 @@ fn alias_room_event_deserialization() {
                 ..
             })
         ))
-        if aliases == vec![ RoomAliasId::try_from("#somewhere:localhost").unwrap() ]
+        if aliases == vec![ room_alias_id!("#somewhere:localhost") ]
     );
 }
 
@@ -244,7 +244,7 @@ fn alias_event_deserialization() {
                 ..
             })
         ))
-        if aliases == vec![ RoomAliasId::try_from("#somewhere:localhost").unwrap() ]
+        if aliases == vec![ room_alias_id!("#somewhere:localhost") ]
     );
 }
 
@@ -256,15 +256,15 @@ fn alias_event_field_access() {
         from_json_value::<AnyEvent>(json_data.clone()),
         Ok(AnyEvent::State(state_event))
         if state_event.state_key() == ""
-            && state_event.room_id() == &RoomId::try_from("!room:room.com").unwrap()
-            && state_event.event_id() == &EventId::try_from("$152037280074GZeOm:localhost").unwrap()
-            && state_event.sender() == &UserId::try_from("@example:localhost").unwrap()
+            && state_event.room_id() == &room_id!("!room:room.com")
+            && state_event.event_id() == &event_id!("$152037280074GZeOm:localhost")
+            && state_event.sender() == &user_id!("@example:localhost")
     );
 
     let deser = from_json_value::<AnyStateEvent>(json_data).unwrap();
     if let AnyStateEventContent::RoomAliases(AliasesEventContent { aliases, .. }) = deser.content()
     {
-        assert_eq!(aliases, vec![RoomAliasId::try_from("#somewhere:localhost").unwrap()])
+        assert_eq!(aliases, vec![room_alias_id!("#somewhere:localhost")])
     } else {
         panic!("the `Any*Event` enum's accessor methods may have been altered")
     }

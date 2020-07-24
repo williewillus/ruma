@@ -27,6 +27,7 @@ strum = { version = "0.18.0", features = ["derive"] }
 maplit = "1.0.2"
 matches = "0.1.8"
 ruma-identifiers = { version = "0.17.0", path = "../ruma-identifiers", features = ["rand"] }
+ruma-identifiers-macros = { version = "0.17.0", path = "../ruma-identifiers-macros" }
 trybuild = "1.0.30"
 
 [[bench]]

@@ -32,11 +32,11 @@ fn redaction() -> JsonValue {
 fn serialize_redaction() {
     let aliases_event = RedactionEvent {
         content: RedactionEventContent { reason: Some("being a turd".into()) },
-        redacts: EventId::try_from("$nomore:example.com").unwrap(),
-        event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+        redacts: event_id!("$nomore:example.com"),
+        event_id: event_id!("$h29iv0s8:example.com"),
         origin_server_ts: UNIX_EPOCH + Duration::from_millis(1),
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
-        sender: UserId::try_from("@carl:example.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
+        sender: user_id!("@carl:example.com"),
         unsigned: Unsigned::default(),
     };
 
@@ -64,11 +64,11 @@ fn deserialize_redaction() {
             sender,
             unsigned,
         }) if reas == "being a turd"
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
-            && redacts == EventId::try_from("$nomore:example.com").unwrap()
+            && event_id == event_id!("$h29iv0s8:example.com")
+            && redacts == event_id!("$nomore:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && room_id == room_id!("!roomid:room.com")
+            && sender == user_id!("@carl:example.com")
             && unsigned.is_empty()
     );
 }

@@ -65,7 +65,7 @@ impl PreviousRoom {
 
 /// Used to default the `room_version` field to room version 1.
 fn default_room_version_id() -> RoomVersionId {
-    RoomVersionId::try_from("1").unwrap()
+    RoomVersionId::Version1
 }
 
 #[cfg(test)]
@@ -75,6 +75,7 @@ mod tests {
     use matches::assert_matches;
     use ruma_common::Raw;
     use ruma_identifiers::{RoomVersionId, UserId};
+    use ruma_identifiers_macros::{event_id, room_id, user_id};
     use serde_json::{from_value as from_json_value, json, to_value as to_json_value};
 
     use super::CreateEventContent;
@@ -82,7 +83,7 @@ mod tests {
     #[test]
     fn serialization() {
         let content = CreateEventContent {
-            creator: UserId::try_from("@carl:example.com").unwrap(),
+            creator: user_id!("@carl:example.com"),
             federate: false,
             room_version: RoomVersionId::Version4,
             predecessor: None,

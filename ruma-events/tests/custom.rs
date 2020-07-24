@@ -54,10 +54,10 @@ fn serialize_custom_message_event() {
             }),
             event_type: "m.room.message".into(),
         },
-        event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+        event_id: event_id!("$h29iv0s8:example.com"),
         origin_server_ts: UNIX_EPOCH + Duration::from_millis(10),
-        room_id: RoomId::try_from("!room:room.com").unwrap(),
-        sender: UserId::try_from("@carl:example.com").unwrap(),
+        room_id: room_id!("!room:room.com"),
+        sender: user_id!("@carl:example.com"),
         unsigned: Unsigned::default(),
     });
 
@@ -94,11 +94,11 @@ fn serialize_custom_state_event() {
             }),
             event_type: "m.made.up".into(),
         },
-        event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+        event_id: event_id!("$h29iv0s8:example.com"),
         origin_server_ts: UNIX_EPOCH + Duration::from_millis(10),
         prev_content: None,
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
-        sender: UserId::try_from("@carl:example.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
+        sender: user_id!("@carl:example.com"),
         state_key: "".into(),
         unsigned: Unsigned::default(),
     });
@@ -148,10 +148,10 @@ fn deserialize_custom_state_event() {
             state_key,
             unsigned,
         }) if json == expected_content && event_type == "m.reaction"
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+            && event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(10)
-            && sender == UserId::try_from("@carl:example.com").unwrap()
-            && room_id == RoomId::try_from("!room:room.com").unwrap()
+            && sender == user_id!("@carl:example.com")
+            && room_id == room_id!("!room:room.com")
             && state_key == ""
             && !unsigned.is_empty()
     );
@@ -183,9 +183,9 @@ fn deserialize_custom_state_sync_event() {
             state_key,
             unsigned,
         } if json == expected_content && event_type == "m.reaction"
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+            && event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(10)
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && sender == user_id!("@carl:example.com")
             && state_key == ""
             && !unsigned.is_empty()
     );
@@ -231,9 +231,9 @@ fn deserialize_custom_message_sync_event() {
             sender,
             unsigned,
         })) if json == expected_content && event_type == "m.reaction"
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+            && event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(10)
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && sender == user_id!("@carl:example.com")
             && !unsigned.is_empty()
     );
 }

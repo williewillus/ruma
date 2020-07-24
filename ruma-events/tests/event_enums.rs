@@ -59,10 +59,10 @@ fn deserialize_message_event() {
             sender,
             unsigned,
         }) if sdp == "Hello" && call_id == "foofoo" && version == UInt::new(1).unwrap()
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+            && event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && room_id == room_id!("!roomid:room.com")
+            && sender == user_id!("@carl:example.com")
             && unsigned.is_empty()
     );
 }
@@ -88,10 +88,10 @@ fn serialize_message_event() {
             },
             url: "http://www.matrix.org".into(),
         },
-        event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+        event_id: event_id!("$h29iv0s8:example.com"),
         origin_server_ts: UNIX_EPOCH + Duration::from_millis(1),
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
-        sender: UserId::try_from("@carl:example.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
+        sender: user_id!("@carl:example.com"),
         unsigned: Unsigned::default(),
     });
 

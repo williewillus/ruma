@@ -46,6 +46,7 @@ mod tests {
 
     use ruma_common::Raw;
     use ruma_identifiers::{EventId, RoomAliasId, RoomId, UserId};
+    use ruma_identifiers_macros::{event_id, room_alias_id, room_id, user_id};
     use serde_json::{from_value as from_json_value, json, to_value as to_json_value};
 
     use super::CanonicalAliasEventContent;
@@ -55,14 +56,14 @@ mod tests {
     fn serialization_with_optional_fields_as_none() {
         let canonical_alias_event = StateEvent {
             content: CanonicalAliasEventContent {
-                alias: Some(RoomAliasId::try_from("#somewhere:localhost").unwrap()),
+                alias: Some(room_alias_id!("#somewhere:localhost")),
                 alt_aliases: Vec::new(),
             },
-            event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+            event_id: event_id!("$h29iv0s8:example.com"),
             origin_server_ts: UNIX_EPOCH + Duration::from_millis(1),
             prev_content: None,
-            room_id: RoomId::try_from("!dummy:example.com").unwrap(),
-            sender: UserId::try_from("@carl:example.com").unwrap(),
+            room_id: room_id!("!dummy:example.com"),
+            sender: user_id!("@carl:example.com"),
             state_key: "".into(),
             unsigned: Unsigned::default(),
         };
@@ -156,7 +157,7 @@ mod tests {
 
     #[test]
     fn nonempty_field_as_some() {
-        let alias = Some(RoomAliasId::try_from("#somewhere:localhost").unwrap());
+        let alias = Some(room_alias_id!("#somewhere:localhost"));
         let json_data = json!({
             "content": {
                 "alias": "#somewhere:localhost"

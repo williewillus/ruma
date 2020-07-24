@@ -65,7 +65,7 @@ mod tests {
         let incoming =
             from_json_value::<InvitationRecipient>(json!({ "user_id": "@carl:example.org" }))
                 .unwrap();
-        let user_id = UserId::try_from("@carl:example.org").unwrap();
+        let user_id = user_id!("@carl:example.org");
         let recipient = InvitationRecipient::UserId { user_id };
         assert_eq!(incoming, recipient);
     }

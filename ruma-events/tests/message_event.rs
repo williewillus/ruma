@@ -36,10 +36,10 @@ fn message_serialize_sticker() {
             },
             url: "http://www.matrix.org".into(),
         }),
-        event_id: EventId::try_from("$h29iv0s8:example.com").unwrap(),
+        event_id: event_id!("$h29iv0s8:example.com"),
         origin_server_ts: UNIX_EPOCH + Duration::from_millis(1),
-        room_id: RoomId::try_from("!roomid:room.com").unwrap(),
-        sender: UserId::try_from("@carl:example.com").unwrap(),
+        room_id: room_id!("!roomid:room.com"),
+        sender: user_id!("@carl:example.com"),
         unsigned: Unsigned::default(),
     };
 
@@ -137,10 +137,10 @@ fn deserialize_message_call_answer() {
             sender,
             unsigned,
         } if sdp == "Hello" && call_id == "foofoo" && version == UInt::new(1).unwrap()
-            && event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+            && event_id == event_id!("$h29iv0s8:example.com")
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && room_id == room_id!("!roomid:room.com")
+            && sender == user_id!("@carl:example.com")
             && unsigned.is_empty()
     );
 }
@@ -196,11 +196,11 @@ fn deserialize_message_sticker() {
             room_id,
             sender,
             unsigned
-        } if event_id == EventId::try_from("$h29iv0s8:example.com").unwrap()
+        } if event_id == event_id!("$h29iv0s8:example.com")
             && body == "Hello"
             && origin_server_ts == UNIX_EPOCH + Duration::from_millis(1)
-            && room_id == RoomId::try_from("!roomid:room.com").unwrap()
-            && sender == UserId::try_from("@carl:example.com").unwrap()
+            && room_id == room_id!("!roomid:room.com")
+            && sender == user_id!("@carl:example.com")
             && height == UInt::new(423)
             && width == UInt::new(1011)
             && mimetype == "image/png"
@@ -225,7 +225,7 @@ fn deserialize_message_sticker() {
 
 #[test]
 fn deserialize_message_then_convert_to_full() {
-    let rid = RoomId::try_from("!roomid:room.com").unwrap();
+    let rid = room_id!("!roomid:room.com");
     let json_data = json!({
         "content": {
             "answer": {

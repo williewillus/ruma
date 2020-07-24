@@ -36,6 +36,7 @@ mod tests {
     use std::convert::TryFrom;
 
     use ruma_identifiers::RoomId;
+    use ruma_identifiers_macros::{event_id, room_alias_id, room_id, user_id};
     use serde_json::{json, to_value as to_json_value};
 
     use super::RoomKeyEventContent;
@@ -46,7 +47,7 @@ mod tests {
         let ev = BasicEvent {
             content: RoomKeyEventContent {
                 algorithm: Algorithm::MegolmV1AesSha2,
-                room_id: RoomId::try_from("!testroomid:example.org").unwrap(),
+                room_id: room_id!("!testroomid:example.org"),
                 session_id: "SessId".into(),
                 session_key: "SessKey".into(),
             },
