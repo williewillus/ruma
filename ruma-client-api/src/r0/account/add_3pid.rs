@@ -17,7 +17,7 @@ ruma_api! {
     request: {
         /// Additional information for the User-Interactive Authentication API.
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub auth: Option<AuthData>,
+        pub auth: Option<&'a AuthData>,
 
         /// Client-generated secret string used to protect this session.
         pub client_secret: &'a str,
