@@ -25,10 +25,10 @@ ruma_api! {
         pub logout_devices: bool,
 
         /// Additional authentication information for the user-interactive authentication API.
-        pub auth: Option<AuthData>,
+        pub auth: Option<AuthData<'a>>,
     }
 
     response: {}
 
-    error: UiaaResponse
+    error: UiaaResponse<'a>
 }

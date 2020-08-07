@@ -232,6 +232,12 @@ impl ToTokens for Api {
         let response_doc = format!("Data in the response from the `{}` API endpoint.", name);
 
         let error = &self.error;
+        let mut incoming = self.error.clone();
+        let incoming_error = if crate::derive_outgoing::strip_lifetimes(&mut incoming) {
+            incoming
+        } else {
+            self.error.clone()
+        };
 
         let response_lifetimes = self.response.combine_lifetimes();
         let request_lifetimes = self.request.combine_lifetimes();
@@ -303,7 +309,7 @@ impl ToTokens for Api {
             impl ::std::convert::TryFrom<::ruma_api::exports::http::Response<Vec<u8>>>
                 for #response_try_from_type
             {
-                type Error = ::ruma_api::error::FromHttpResponseError<#error>;
+                type Error = ::ruma_api::error::FromHttpResponseError<#incoming_error>;
 
                 #[allow(unused_variables)]
                 fn try_from(
@@ -318,7 +324,7 @@ impl ToTokens for Api {
                             #response_init_fields
                         })
                     } else {
-                        match <#error as ::ruma_api::EndpointError>::try_from_response(response) {
+                        match <#incoming_error as ::ruma_api::EndpointError>::try_from_response(response) {
                             Ok(err) => Err(::ruma_api::error::ServerError::Known(err).into()),
                             Err(response_err) => Err(::ruma_api::error::ServerError::Unknown(response_err).into())
                         }

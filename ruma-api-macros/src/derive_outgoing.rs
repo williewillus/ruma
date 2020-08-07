@@ -141,7 +141,7 @@ fn split_for_impl_lifetime_less(generics: &mut Generics) -> (ImplGenerics, TypeG
     (impl_gen, ty_gen)
 }
 
-fn strip_lifetimes(field_type: &mut Type) -> bool {
+pub(crate) fn strip_lifetimes(field_type: &mut Type) -> bool {
     match field_type {
         // T<'a> -> IncomingT
         // The IncomingT has to be declared by the user of this derive macro.

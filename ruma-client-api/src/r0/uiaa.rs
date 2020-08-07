@@ -5,7 +5,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
-use ruma_api::{error::ResponseDeserializationError, EndpointError};
+use ruma_api::{error::ResponseDeserializationError, EndpointError, Outgoing};
 use serde::{Deserialize, Serialize};
 use serde_json::{
     from_slice as from_json_slice, to_vec as to_json_vec, value::RawValue as RawJsonValue,
@@ -15,19 +15,19 @@ use serde_json::{
 use crate::error::{Error as MatrixError, ErrorBody};
 
 /// Additional authentication information for the user-interactive authentication API.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Outgoing, Serialize)]
 #[serde(untagged)]
-pub enum AuthData {
+pub enum AuthData<'a> {
     /// Used for sending UIAA authentication requests to the homeserver directly
     /// from the client.
     DirectRequest {
         /// The login type that the client is attempting to complete.
         #[serde(rename = "type")]
-        kind: String,
+        kind: &'a str,
 
         /// The value of the session key given by the homeserver.
         #[serde(skip_serializing_if = "Option::is_none")]
-        session: Option<String>,
+        session: Option<&'a str>,
 
         /// Parameters submitted for a particular authentication stage.
         // FIXME: RawJsonValue doesn't work here, is that a bug?
@@ -39,14 +39,14 @@ pub enum AuthData {
     /// stage through the fallback method.
     FallbackAcknowledgement {
         /// The value of the session key given by the homeserver.
-        session: String,
+        session: &'a str,
     },
 }
 
 /// Information about available authentication flows and status for
-/// User-Interactive Authenticiation API.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct UiaaInfo {
+/// User-Interactive Authentication API.
+#[derive(Clone, Debug, Outgoing, Serialize)]
+pub struct UiaaInfo<'a> {
     /// List of authentication flows available for this endpoint.
     pub flows: Vec<AuthFlow>,
 
@@ -62,7 +62,7 @@ pub struct UiaaInfo {
 
     /// Session key for client to use to complete authentication.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub session: Option<String>,
+    pub session: Option<&'a str>,
 
     /// Authentication-related errors for previous request returned by homeserver.
     #[serde(flatten, skip_serializing_if = "Option::is_none")]
@@ -71,7 +71,7 @@ pub struct UiaaInfo {
 
 /// Description of steps required to authenticate via the User-Interactive
 /// Authentication API.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Outgoing, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct AuthFlow {
     /// Ordered list of stages required to complete authentication.
@@ -82,15 +82,29 @@ pub struct AuthFlow {
 /// Contains either a User-Interactive Authentication API response body or a
 /// Matrix error.
 #[derive(Clone, Debug)]
-pub enum UiaaResponse {
+pub enum UiaaResponse<'a> {
     /// User-Interactive Authentication API response
-    AuthResponse(UiaaInfo),
+    AuthResponse(UiaaInfo<'a>),
 
     /// Matrix error response
     MatrixError(MatrixError),
 }
 
-impl Display for UiaaResponse {
+/// Incoming variant of `UiaaResponse`.
+#[derive(Debug)]
+pub enum IncomingUiaaResponse {
+    /// User-Interactive Authentication API response
+    AuthResponse(IncomingUiaaInfo),
+
+    /// Matrix error response
+    MatrixError(MatrixError),
+}
+
+impl<'a> Outgoing for UiaaResponse<'a> {
+    type Incoming = IncomingUiaaResponse;
+}
+
+impl<'a> Display for UiaaResponse<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::AuthResponse(_) => write!(f, "User-Interactive Authentication required."),
@@ -99,19 +113,39 @@ impl Display for UiaaResponse {
     }
 }
 
-impl From<MatrixError> for UiaaResponse {
+impl<'a> From<MatrixError> for UiaaResponse<'a> {
     fn from(error: MatrixError) -> Self {
         Self::MatrixError(error)
     }
 }
 
-impl EndpointError for UiaaResponse {
+impl From<MatrixError> for IncomingUiaaResponse {
+    fn from(error: MatrixError) -> Self {
+        Self::MatrixError(error)
+    }
+}
+
+// impl<'a> EndpointError for UiaaResponse<'a> {
+//     fn try_from_response(
+//         response: http::Response<Vec<u8>>,
+//     ) -> Result<Self, ResponseDeserializationError> {
+//         if response.status() == http::StatusCode::UNAUTHORIZED {
+//             if let Ok(authentication_info) = from_json_slice::<UiaaInfo>(response.body()) {
+//                 return Ok(UiaaResponse::AuthResponse(authentication_info));
+//             }
+//         }
+
+//         MatrixError::try_from_response(response).map(From::from)
+//     }
+// }
+
+impl EndpointError for IncomingUiaaResponse {
     fn try_from_response(
         response: http::Response<Vec<u8>>,
     ) -> Result<Self, ResponseDeserializationError> {
         if response.status() == http::StatusCode::UNAUTHORIZED {
-            if let Ok(authentication_info) = from_json_slice::<UiaaInfo>(response.body()) {
-                return Ok(UiaaResponse::AuthResponse(authentication_info));
+            if let Ok(authentication_info) = from_json_slice::<IncomingUiaaInfo>(response.body()) {
+                return Ok(IncomingUiaaResponse::AuthResponse(authentication_info));
             }
         }
 
@@ -119,7 +153,7 @@ impl EndpointError for UiaaResponse {
     }
 }
 
-impl From<UiaaResponse> for http::Response<Vec<u8>> {
+impl<'a> From<UiaaResponse<'a>> for http::Response<Vec<u8>> {
     fn from(uiaa_response: UiaaResponse) -> http::Response<Vec<u8>> {
         match uiaa_response {
             UiaaResponse::AuthResponse(authentication_info) => http::Response::builder()

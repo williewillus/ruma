@@ -3,7 +3,7 @@
 use ruma_api::ruma_api;
 use ruma_identifiers::DeviceId;
 
-use crate::r0::uiaa::{AuthData, UiaaResponse};
+use crate::r0::uiaa::{AuthData, IncomingAuthData, UiaaResponse};
 
 ruma_api! {
     metadata: {
@@ -21,10 +21,10 @@ ruma_api! {
 
         /// Additional authentication information for the user-interactive authentication API.
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub auth: Option<AuthData>,
+        pub auth: Option<AuthData<'a>>,
     }
 
     response: {}
 
-    error: UiaaResponse
+    error: UiaaResponse<'a>
 }
