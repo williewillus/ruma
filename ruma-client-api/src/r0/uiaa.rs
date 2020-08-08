@@ -71,7 +71,7 @@ pub struct UiaaInfo<'a> {
 
 /// Description of steps required to authenticate via the User-Interactive
 /// Authentication API.
-#[derive(Clone, Debug, Outgoing, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(test, derive(PartialEq))]
 pub struct AuthFlow {
     /// Ordered list of stages required to complete authentication.
@@ -113,31 +113,11 @@ impl<'a> Display for UiaaResponse<'a> {
     }
 }
 
-impl<'a> From<MatrixError> for UiaaResponse<'a> {
-    fn from(error: MatrixError) -> Self {
-        Self::MatrixError(error)
-    }
-}
-
 impl From<MatrixError> for IncomingUiaaResponse {
     fn from(error: MatrixError) -> Self {
         Self::MatrixError(error)
     }
 }
-
-// impl<'a> EndpointError for UiaaResponse<'a> {
-//     fn try_from_response(
-//         response: http::Response<Vec<u8>>,
-//     ) -> Result<Self, ResponseDeserializationError> {
-//         if response.status() == http::StatusCode::UNAUTHORIZED {
-//             if let Ok(authentication_info) = from_json_slice::<UiaaInfo>(response.body()) {
-//                 return Ok(UiaaResponse::AuthResponse(authentication_info));
-//             }
-//         }
-
-//         MatrixError::try_from_response(response).map(From::from)
-//     }
-// }
 
 impl EndpointError for IncomingUiaaResponse {
     fn try_from_response(
@@ -177,14 +157,17 @@ mod tests {
         Value as JsonValue,
     };
 
-    use super::{AuthData, AuthFlow, UiaaInfo, UiaaResponse};
+    use super::{
+        AuthData, AuthFlow, IncomingAuthData, IncomingUiaaInfo, IncomingUiaaResponse, UiaaInfo,
+        UiaaResponse,
+    };
     use crate::error::{ErrorBody, ErrorKind};
 
     #[test]
     fn test_serialize_authentication_data_direct_request() {
         let authentication_data = AuthData::DirectRequest {
-            kind: "example.type.foo".into(),
-            session: Some("ZXY000".into()),
+            kind: "example.type.foo",
+            session: Some("ZXY000"),
             auth_parameters: btreemap! {
                 "example_credential".to_owned() => json!("verypoorsharedsecret")
             },
@@ -209,8 +192,8 @@ mod tests {
         });
 
         assert_matches!(
-            from_json_value::<AuthData>(json).unwrap(),
-            AuthData::DirectRequest { kind, session: Some(session), auth_parameters }
+            from_json_value::<IncomingAuthData>(json).unwrap(),
+            IncomingAuthData::DirectRequest { kind, session: Some(session), auth_parameters }
             if kind == "example.type.foo"
                 && session == "opaque_session_id"
                 && auth_parameters == btreemap!{
@@ -221,7 +204,7 @@ mod tests {
 
     #[test]
     fn test_serialize_authentication_data_fallback() {
-        let authentication_data = AuthData::FallbackAcknowledgement { session: "ZXY000".into() };
+        let authentication_data = AuthData::FallbackAcknowledgement { session: "ZXY000" };
 
         assert_eq!(json!({ "session": "ZXY000" }), to_json_value(authentication_data).unwrap());
     }
@@ -231,8 +214,8 @@ mod tests {
         let json = json!({ "session": "opaque_session_id" });
 
         assert_matches!(
-            from_json_value::<AuthData>(json).unwrap(),
-            AuthData::FallbackAcknowledgement { session }
+            from_json_value::<IncomingAuthData>(json).unwrap(),
+            IncomingAuthData::FallbackAcknowledgement { session }
             if session == "opaque_session_id"
         );
     }
@@ -289,8 +272,8 @@ mod tests {
         });
 
         assert_matches!(
-            from_json_value::<UiaaInfo>(json).unwrap(),
-            UiaaInfo {
+            from_json_value::<IncomingUiaaInfo>(json).unwrap(),
+            IncomingUiaaInfo {
                 auth_error: Some(ErrorBody {
                     kind: ErrorKind::Forbidden,
                     message: error_message,
@@ -343,8 +326,8 @@ mod tests {
         let uiaa_response: http::Response<Vec<u8>> = UiaaResponse::AuthResponse(uiaa_info).into();
 
         assert_matches!(
-            from_json_slice::<UiaaInfo>(uiaa_response.body()).unwrap(),
-            UiaaInfo {
+            from_json_slice::<IncomingUiaaInfo>(uiaa_response.body()).unwrap(),
+            IncomingUiaaInfo {
                 flows,
                 completed,
                 params,
@@ -391,14 +374,15 @@ mod tests {
             .body(json.into())
             .unwrap();
 
-        let parsed_uiaa_info = match UiaaResponse::try_from_response(http_response).unwrap() {
-            UiaaResponse::AuthResponse(uiaa_info) => uiaa_info,
+        let parsed_uiaa_info = match IncomingUiaaResponse::try_from_response(http_response).unwrap()
+        {
+            IncomingUiaaResponse::AuthResponse(uiaa_info) => uiaa_info,
             _ => panic!("Expected UiaaResponse::AuthResponse"),
         };
 
         assert_matches!(
             parsed_uiaa_info,
-            UiaaInfo {
+            IncomingUiaaInfo {
                 auth_error: Some(ErrorBody {
                     kind: ErrorKind::Forbidden,
                     message: error_message,
