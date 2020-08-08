@@ -24,6 +24,13 @@ pub fn expand_derive_outgoing(input: DeriveInput) -> syn::Result<TokenStream> {
         quote!(::ruma_api::exports::serde::Deserialize)
     };
 
+    let serde_attrs = input
+        .attrs
+        .clone()
+        .into_iter()
+        .filter(|attr| attr.path.is_ident("serde"))
+        .collect::<Vec<_>>();
+
     let data = match input.data.clone() {
         Data::Union(_) => panic!("#[derive(Outgoing)] does not support Union types"),
         Data::Enum(e) => DataKind::Enum(e.variants.into_iter().collect()),
@@ -67,6 +74,7 @@ pub fn expand_derive_outgoing(input: DeriveInput) -> syn::Result<TokenStream> {
             Ok(quote! {
                 #[doc = #doc]
                 #[derive(Debug, #derive_deserialize)]
+                #( #serde_attrs )*
                 #vis enum #incoming_ident #ty_gen { #( #vars, )* }
 
                 impl #original_impl_gen ::ruma_api::Outgoing for #original_ident #original_ty_gen {
@@ -104,6 +112,7 @@ pub fn expand_derive_outgoing(input: DeriveInput) -> syn::Result<TokenStream> {
             Ok(quote! {
                 #[doc = #doc]
                 #[derive(Debug, #derive_deserialize)]
+                #( #serde_attrs )*
                 #vis struct #incoming_ident #ty_gen #struct_def
 
                 impl #original_impl_gen ::ruma_api::Outgoing for #original_ident #original_ty_gen {
