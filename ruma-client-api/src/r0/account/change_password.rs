@@ -2,7 +2,7 @@
 
 use ruma_api::ruma_api;
 
-use crate::r0::uiaa::{AuthData, UiaaResponse};
+use crate::r0::uiaa::{AuthData, IncomingAuthData, IncomingUiaaResponse, UiaaResponse};
 
 ruma_api! {
     metadata: {

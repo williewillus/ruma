@@ -3,7 +3,7 @@
 use ruma_api::ruma_api;
 use ruma_identifiers::DeviceId;
 
-use crate::r0::uiaa::{AuthData, IncomingAuthData, UiaaResponse};
+use crate::r0::uiaa::{AuthData, IncomingAuthData, IncomingUiaaResponse, UiaaResponse};
 
 ruma_api! {
     metadata: {
