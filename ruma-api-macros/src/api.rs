@@ -231,13 +231,8 @@ impl ToTokens for Api {
         );
         let response_doc = format!("Data in the response from the `{}` API endpoint.", name);
 
-        let error = &self.error;
-        let mut incoming = self.error.clone();
-        let incoming_error = if crate::derive_outgoing::strip_lifetimes(&mut incoming) {
-            incoming
-        } else {
-            self.error.clone()
-        };
+        let mut error_type = self.error.clone();
+        crate::derive_outgoing::strip_lifetimes(&mut error_type);
 
         let response_lifetimes = self.response.combine_lifetimes();
         let request_lifetimes = self.request.combine_lifetimes();
@@ -309,7 +304,7 @@ impl ToTokens for Api {
             impl ::std::convert::TryFrom<::ruma_api::exports::http::Response<Vec<u8>>>
                 for #response_try_from_type
             {
-                type Error = ::ruma_api::error::FromHttpResponseError<#incoming_error>;
+                type Error = ::ruma_api::error::FromHttpResponseError<#error_type>;
 
                 #[allow(unused_variables)]
                 fn try_from(
@@ -324,7 +319,7 @@ impl ToTokens for Api {
                             #response_init_fields
                         })
                     } else {
-                        match <#incoming_error as ::ruma_api::EndpointError>::try_from_response(response) {
+                        match <#error_type as ::ruma_api::EndpointError>::try_from_response(response) {
                             Ok(err) => Err(::ruma_api::error::ServerError::Known(err).into()),
                             Err(response_err) => Err(::ruma_api::error::ServerError::Unknown(response_err).into())
                         }
@@ -334,7 +329,7 @@ impl ToTokens for Api {
 
             impl #request_lifetimes ::ruma_api::Endpoint for Request #request_lifetimes {
                 type Response = Response #response_lifetimes;
-                type ResponseError = #error;
+                type ResponseError = #error_type;
 
                 /// Metadata for the `#name` endpoint.
                 const METADATA: ::ruma_api::Metadata = ::ruma_api::Metadata {
