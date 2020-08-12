@@ -10,6 +10,7 @@ Improvements:
 
   ```
   device::get_devices::v1,
+  directory::get_public_rooms_filtered::v1,
   keys::{
       claim_keys::v1,
       query_keys::v1,
